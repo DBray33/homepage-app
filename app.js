@@ -302,9 +302,12 @@ async function updateWeather() {
 
     // Fallback to OpenWeather
     if (userData.location) {
-      // Add country code if not already present
-      let location = userData.location;
-      if (!location.includes(',')) {
+      // Clean location: remove state abbreviations like "PA", "NY", etc.
+      let location = userData.location.trim()
+        .replace(/,?\s*(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\s*$/i, '');
+
+      // Add US country code if not present
+      if (!location.toLowerCase().includes(',us')) {
         location = `${location},US`;
       }
 
