@@ -8,6 +8,22 @@ let userData = {
 // Initialize todos
 let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
+// Helper function to load todos from storage (called from auth.js)
+window.loadTodosFromStorage = function () {
+  todos = JSON.parse(localStorage.getItem('todos')) || [];
+  renderTodos();
+};
+
+// Helper function to save todos
+async function saveTodos() {
+  localStorage.setItem('todos', JSON.stringify(todos));
+
+  // Save to Firestore if user is logged in
+  if (window.auth && window.auth.currentUser && window.saveTodosToFirestore) {
+    await window.saveTodosToFirestore(todos);
+  }
+}
+
 // ===========================
 // TODO LIST FUNCTIONS
 // ===========================
@@ -63,7 +79,7 @@ function handleTodoKeypress(event) {
   }
 }
 
-function addTodo() {
+async function addTodo() {
   const input = document.getElementById('todoInput');
   const text = input.value.trim();
 
@@ -74,23 +90,23 @@ function addTodo() {
       createdAt: new Date().toISOString(),
     });
 
-    localStorage.setItem('todos', JSON.stringify(todos));
+    await saveTodos();
     renderTodos();
     input.value = '';
     document.getElementById('todoInputContainer').style.display = 'none';
   }
 }
 
-function toggleTodo(index) {
+async function toggleTodo(index) {
   todos[index].completed = !todos[index].completed;
-  localStorage.setItem('todos', JSON.stringify(todos));
+  await saveTodos();
   renderTodos();
 }
 
-function deleteTodo(event, index) {
+async function deleteTodo(event, index) {
   event.stopPropagation();
   todos.splice(index, 1);
-  localStorage.setItem('todos', JSON.stringify(todos));
+  await saveTodos();
   renderTodos();
 }
 

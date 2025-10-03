@@ -89,6 +89,7 @@ async function createUserSettings(uid) {
   const defaultSettings = {
     name: '',
     location: '',
+    todos: [],
     createdAt: new Date().toISOString(),
   };
 
@@ -103,6 +104,15 @@ async function loadUserSettings(uid) {
       const data = userDoc.data();
       localStorage.setItem('userName', data.name || '');
       localStorage.setItem('userLocation', data.location || '');
+
+      // Load todos
+      if (data.todos) {
+        localStorage.setItem('todos', JSON.stringify(data.todos));
+        // Update todos in memory and re-render
+        if (window.loadTodosFromStorage) {
+          window.loadTodosFromStorage();
+        }
+      }
     }
   } catch (error) {
     console.error('Error loading user settings:', error);
@@ -127,6 +137,27 @@ window.saveUserSettings = async (name, location) => {
 
     localStorage.setItem('userName', name);
     localStorage.setItem('userLocation', location);
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Save todos to Firestore
+window.saveTodosToFirestore = async (todos) => {
+  const user = window.auth.currentUser;
+  if (!user) return { success: false, error: 'No user signed in' };
+
+  try {
+    await setDoc(
+      doc(window.db, 'users', user.uid),
+      {
+        todos: todos,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
 
     return { success: true };
   } catch (error) {
