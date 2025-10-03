@@ -1,10 +1,10 @@
 // API Keys
 const PEXELS_API_KEY =
   'XM1cPVOd285bkUsc2iiOKjhLg7oGjwvXQCIHjextLMBD0ByhUGN4tDQD';
-const OPENWEATHER_API_KEY = '4660633db296e7f4af7ca53dcb5a7f95';
+const OPENWEATHER_API_KEY = 'a64d9def357accae801b18b33d7bbe22';
 
 // Alternative weather service (free, no key needed)
-const USE_ALTERNATIVE_WEATHER = true;
+const USE_ALTERNATIVE_WEATHER = false;
 
 // Fallback videos if API fails
 const fallbackVideos = [
