@@ -302,8 +302,14 @@ async function updateWeather() {
 
     // Fallback to OpenWeather
     if (userData.location) {
+      // Add country code if not already present
+      let location = userData.location;
+      if (!location.includes(',')) {
+        location = `${location},US`;
+      }
+
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-        userData.location
+        location
       )}&appid=${OPENWEATHER_API_KEY}&units=imperial`;
       const response = await fetch(url);
 
