@@ -360,26 +360,135 @@ async function updateWeather() {
 // SEARCH FUNCTIONALITY
 // ===========================
 
+let selectedSuggestionIndex = -1;
+
 // Clear search bar on page load (prevent autofill)
 window.addEventListener('load', function () {
   document.getElementById('searchBar').value = '';
 });
 
-document.getElementById('searchBar').addEventListener('keypress', function (e) {
-  if (e.key === 'Enter') {
-    const query = this.value.trim();
-    if (query) {
-      if (query.includes('.') && !query.includes(' ')) {
-        window.location.href = query.startsWith('http')
-          ? query
-          : `https://${query}`;
-      } else {
-        // Use html version to bypass Google app on iOS
-        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
-          query
-        )}&gbv=1`;
-      }
+// Fetch search suggestions from Google
+async function fetchSearchSuggestions(query) {
+  if (!query.trim()) {
+    document.getElementById('searchSuggestions').style.display = 'none';
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(
+        query
+      )}`
+    );
+    const data = await response.json();
+    const suggestions = data[1] || [];
+
+    displaySuggestions(suggestions, query);
+  } catch (error) {
+    console.error('Failed to fetch suggestions:', error);
+  }
+}
+
+// Display suggestions
+function displaySuggestions(suggestions, query) {
+  const suggestionsDiv = document.getElementById('searchSuggestions');
+
+  if (suggestions.length === 0) {
+    suggestionsDiv.style.display = 'none';
+    return;
+  }
+
+  suggestionsDiv.innerHTML = suggestions
+    .slice(0, 8)
+    .map(
+      (suggestion, index) =>
+        `<div class="suggestion-item" data-index="${index}" onclick="selectSuggestion('${suggestion
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '&quot;')}')">
+          <i class="fas fa-search suggestion-icon"></i>
+          <span>${suggestion}</span>
+        </div>`
+    )
+    .join('');
+
+  suggestionsDiv.style.display = 'block';
+  selectedSuggestionIndex = -1;
+}
+
+// Select a suggestion
+window.selectSuggestion = function (suggestion) {
+  const searchBar = document.getElementById('searchBar');
+  searchBar.value = suggestion;
+  document.getElementById('searchSuggestions').style.display = 'none';
+  performSearch(suggestion);
+};
+
+// Perform search
+function performSearch(query) {
+  if (query.trim()) {
+    if (query.includes('.') && !query.includes(' ')) {
+      window.location.href = query.startsWith('http') ? query : `https://${query}`;
+    } else {
+      window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
+        query
+      )}&gbv=1`;
     }
+  }
+}
+
+// Search bar input listener
+let suggestionTimeout;
+document.getElementById('searchBar').addEventListener('input', function (e) {
+  clearTimeout(suggestionTimeout);
+  suggestionTimeout = setTimeout(() => {
+    fetchSearchSuggestions(this.value);
+  }, 200);
+});
+
+// Search bar keypress listener
+document.getElementById('searchBar').addEventListener('keydown', function (e) {
+  const suggestionsDiv = document.getElementById('searchSuggestions');
+  const suggestionItems = suggestionsDiv.querySelectorAll('.suggestion-item');
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedSuggestionIndex = Math.min(
+      selectedSuggestionIndex + 1,
+      suggestionItems.length - 1
+    );
+    updateSelectedSuggestion(suggestionItems);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+    updateSelectedSuggestion(suggestionItems);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (selectedSuggestionIndex >= 0 && suggestionItems[selectedSuggestionIndex]) {
+      suggestionItems[selectedSuggestionIndex].click();
+    } else {
+      performSearch(this.value.trim());
+    }
+    suggestionsDiv.style.display = 'none';
+  } else if (e.key === 'Escape') {
+    suggestionsDiv.style.display = 'none';
+  }
+});
+
+// Update selected suggestion highlight
+function updateSelectedSuggestion(items) {
+  items.forEach((item, index) => {
+    if (index === selectedSuggestionIndex) {
+      item.classList.add('selected');
+    } else {
+      item.classList.remove('selected');
+    }
+  });
+}
+
+// Close suggestions when clicking outside
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.search-container')) {
+    document.getElementById('searchSuggestions').style.display = 'none';
   }
 });
 
