@@ -353,6 +353,75 @@ document.getElementById('searchBar').addEventListener('keypress', function (e) {
 });
 
 // ===========================
+// AUTH FUNCTIONS
+// ===========================
+
+function showSignIn() {
+  document.getElementById('signInForm').classList.remove('hidden');
+  document.getElementById('signUpForm').classList.add('hidden');
+  document.querySelectorAll('.auth-tab')[0].classList.add('active');
+  document.querySelectorAll('.auth-tab')[1].classList.remove('active');
+}
+
+function showSignUp() {
+  document.getElementById('signInForm').classList.add('hidden');
+  document.getElementById('signUpForm').classList.remove('hidden');
+  document.querySelectorAll('.auth-tab')[0].classList.remove('active');
+  document.querySelectorAll('.auth-tab')[1].classList.add('active');
+}
+
+async function handleEmailSignIn() {
+  const email = document.getElementById('signInEmail').value;
+  const password = document.getElementById('signInPassword').value;
+  const errorDiv = document.getElementById('signInError');
+
+  if (!email || !password) {
+    errorDiv.textContent = 'Please fill in all fields';
+    return;
+  }
+
+  const result = await window.signInWithEmail(email, password);
+  if (!result.success) {
+    errorDiv.textContent = result.error;
+  }
+}
+
+async function handleEmailSignUp() {
+  const email = document.getElementById('signUpEmail').value;
+  const password = document.getElementById('signUpPassword').value;
+  const errorDiv = document.getElementById('signUpError');
+
+  if (!email || !password) {
+    errorDiv.textContent = 'Please fill in all fields';
+    return;
+  }
+
+  if (password.length < 6) {
+    errorDiv.textContent = 'Password must be at least 6 characters';
+    return;
+  }
+
+  const result = await window.signUpWithEmail(email, password);
+  if (!result.success) {
+    errorDiv.textContent = result.error;
+  }
+}
+
+async function handleGoogleSignIn() {
+  const result = await window.signInWithGoogle();
+  if (!result.success) {
+    document.getElementById('signInError').textContent = result.error;
+  }
+}
+
+async function handleSignOut() {
+  const result = await window.signOutUser();
+  if (result.success) {
+    window.location.reload();
+  }
+}
+
+// ===========================
 // SETTINGS FUNCTIONS
 // ===========================
 
@@ -366,12 +435,18 @@ function closeSettings() {
   document.getElementById('settingsModal').style.display = 'none';
 }
 
-function saveSettings() {
+async function saveSettings() {
   userData.name = document.getElementById('userName').value;
   userData.location = document.getElementById('userLocation').value;
 
-  localStorage.setItem('userName', userData.name);
-  localStorage.setItem('userLocation', userData.location);
+  // Save to Firestore if user is logged in
+  if (window.auth && window.auth.currentUser) {
+    await window.saveUserSettings(userData.name, userData.location);
+  } else {
+    // Fallback to localStorage for guests
+    localStorage.setItem('userName', userData.name);
+    localStorage.setItem('userLocation', userData.location);
+  }
 
   updateGreeting();
   updateWeather();

@@ -253,6 +253,67 @@
       </div>
     </div>
 
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+      <div class="auth-content">
+        <h2 class="auth-header">Welcome to Your Homepage</h2>
+        <p class="auth-subtext">Sign in to sync your settings across devices</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="showSignIn()">Sign In</button>
+          <button class="auth-tab" onclick="showSignUp()">Sign Up</button>
+        </div>
+
+        <!-- Sign In Form -->
+        <div class="auth-form" id="signInForm">
+          <button class="google-btn" onclick="handleGoogleSignIn()">
+            <i class="fab fa-google"></i> Continue with Google
+          </button>
+
+          <div class="auth-divider">
+            <span>or</span>
+          </div>
+
+          <input
+            type="email"
+            class="auth-input"
+            id="signInEmail"
+            placeholder="Email" />
+          <input
+            type="password"
+            class="auth-input"
+            id="signInPassword"
+            placeholder="Password" />
+          <button class="auth-btn" onclick="handleEmailSignIn()">Sign In</button>
+          <div class="auth-error" id="signInError"></div>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div class="auth-form hidden" id="signUpForm">
+          <button class="google-btn" onclick="handleGoogleSignIn()">
+            <i class="fab fa-google"></i> Continue with Google
+          </button>
+
+          <div class="auth-divider">
+            <span>or</span>
+          </div>
+
+          <input
+            type="email"
+            class="auth-input"
+            id="signUpEmail"
+            placeholder="Email" />
+          <input
+            type="password"
+            class="auth-input"
+            id="signUpPassword"
+            placeholder="Password (min 6 characters)" />
+          <button class="auth-btn" onclick="handleEmailSignUp()">Sign Up</button>
+          <div class="auth-error" id="signUpError"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="settings-modal" id="settingsModal">
       <div class="settings-content">
         <button class="close-btn" onclick="closeSettings()">
@@ -279,11 +340,33 @@
         </div>
 
         <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+        <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+      import { getAuth } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js';
+      import { getFirestore } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCLa6YGC-08mItptiXvdvUp6AE-U_I45dA",
+        authDomain: "dash-db-c02d8.firebaseapp.com",
+        projectId: "dash-db-c02d8",
+        storageBucket: "dash-db-c02d8.firebasestorage.app",
+        messagingSenderId: "522759661547",
+        appId: "1:522759651547:web:183626affba01f40c99bae"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+    </script>
+
     <!-- JavaScript -->
     <script src="config.js"></script>
+    <script type="module" src="auth.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
