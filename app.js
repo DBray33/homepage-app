@@ -445,6 +445,15 @@ function openSettings() {
   document.getElementById('settingsModal').style.display = 'block';
   document.getElementById('userName').value = userData.name;
   document.getElementById('userLocation').value = userData.location;
+
+  // Display user email if logged in
+  const emailDisplay = document.getElementById('userEmailDisplay');
+  if (window.auth && window.auth.currentUser) {
+    emailDisplay.textContent = window.auth.currentUser.email;
+    emailDisplay.style.display = 'block';
+  } else {
+    emailDisplay.style.display = 'none';
+  }
 }
 
 function closeSettings() {
