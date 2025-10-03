@@ -5,6 +5,14 @@ let userData = {
   pexelsKey: localStorage.getItem('pexelsApiKey') || '',
 };
 
+// Update user data from Firestore (called by auth.js)
+window.updateUserData = function (name, location) {
+  userData.name = name;
+  userData.location = location;
+  updateGreeting();
+  updateWeather();
+};
+
 // Initialize todos
 let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
@@ -537,11 +545,12 @@ async function handleEmailSignIn() {
 }
 
 async function handleEmailSignUp() {
+  const name = document.getElementById('signUpName').value;
   const email = document.getElementById('signUpEmail').value;
   const password = document.getElementById('signUpPassword').value;
   const errorDiv = document.getElementById('signUpError');
 
-  if (!email || !password) {
+  if (!name || !email || !password) {
     errorDiv.textContent = 'Please fill in all fields';
     return;
   }
@@ -551,7 +560,7 @@ async function handleEmailSignUp() {
     return;
   }
 
-  const result = await window.signUpWithEmail(email, password);
+  const result = await window.signUpWithEmail(email, password, name);
   if (!result.success) {
     errorDiv.textContent = result.error;
   }

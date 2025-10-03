@@ -31,14 +31,14 @@ onAuthStateChanged(window.auth, async (user) => {
 });
 
 // Sign up with email/password
-window.signUpWithEmail = async (email, password) => {
+window.signUpWithEmail = async (email, password, name) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       window.auth,
       email,
       password
     );
-    await createUserSettings(userCredential.user.uid);
+    await createUserSettings(userCredential.user.uid, name);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -64,7 +64,10 @@ window.signInWithGoogle = async () => {
     // Check if this is a new user
     const userDoc = await getDoc(doc(window.db, 'users', user.uid));
     if (!userDoc.exists()) {
-      await createUserSettings(user.uid);
+      // Use display name from Google profile, or first name if available
+      const displayName = user.displayName || '';
+      const firstName = displayName.split(' ')[0];
+      await createUserSettings(user.uid, firstName);
     }
 
     return { success: true };
@@ -85,9 +88,9 @@ window.signOutUser = async () => {
 };
 
 // Create default user settings in Firestore
-async function createUserSettings(uid) {
+async function createUserSettings(uid, name = '') {
   const defaultSettings = {
-    name: '',
+    name: name,
     location: '',
     todos: [],
     createdAt: new Date().toISOString(),
@@ -104,6 +107,11 @@ async function loadUserSettings(uid) {
       const data = userDoc.data();
       localStorage.setItem('userName', data.name || '');
       localStorage.setItem('userLocation', data.location || '');
+
+      // Update userData in app.js
+      if (window.updateUserData) {
+        window.updateUserData(data.name || '', data.location || '');
+      }
 
       // Load todos
       if (data.todos) {
