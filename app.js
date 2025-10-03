@@ -351,6 +351,11 @@ async function updateWeather() {
 // SEARCH FUNCTIONALITY
 // ===========================
 
+// Clear search bar on page load (prevent autofill)
+window.addEventListener('load', function () {
+  document.getElementById('searchBar').value = '';
+});
+
 document.getElementById('searchBar').addEventListener('keypress', function (e) {
   if (e.key === 'Enter') {
     const query = this.value.trim();
