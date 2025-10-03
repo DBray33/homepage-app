@@ -374,10 +374,10 @@ document.getElementById('searchBar').addEventListener('keypress', function (e) {
           ? query
           : `https://${query}`;
       } else {
-        // Use google.com/search with igu parameter to prevent app redirect
-        window.location.href = `https://www.google.com/search?igu=1&q=${encodeURIComponent(
+        // Use html version to bypass Google app on iOS
+        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
           query
-        )}`;
+        )}&gbv=1`;
       }
     }
   }
