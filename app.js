@@ -367,26 +367,36 @@ window.addEventListener('load', function () {
   document.getElementById('searchBar').value = '';
 });
 
-// Fetch search suggestions from Google
-async function fetchSearchSuggestions(query) {
+// Fetch search suggestions from Google using JSONP
+function fetchSearchSuggestions(query) {
   if (!query.trim()) {
     document.getElementById('searchSuggestions').style.display = 'none';
     return;
   }
 
-  try {
-    const response = await fetch(
-      `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(
-        query
-      )}`
-    );
-    const data = await response.json();
-    const suggestions = data[1] || [];
-
-    displaySuggestions(suggestions, query);
-  } catch (error) {
-    console.error('Failed to fetch suggestions:', error);
+  // Remove any existing script tags for suggestions
+  const existingScript = document.getElementById('suggestion-script');
+  if (existingScript) {
+    existingScript.remove();
   }
+
+  // Create callback function name
+  const callbackName = 'handleSuggestions';
+
+  // Create global callback
+  window[callbackName] = function (data) {
+    const suggestions = data[1] || [];
+    displaySuggestions(suggestions, query);
+    delete window[callbackName];
+  };
+
+  // Create script tag for JSONP
+  const script = document.createElement('script');
+  script.id = 'suggestion-script';
+  script.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(
+    query
+  )}&callback=${callbackName}`;
+  document.head.appendChild(script);
 }
 
 // Display suggestions
