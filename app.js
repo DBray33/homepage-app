@@ -222,9 +222,10 @@ async function updateQuote() {
   const quoteElement = document.getElementById('quote');
 
   try {
-    const response = await fetch('https://api.quotable.io/random?maxLength=150');
+    // Try ZenQuotes API (different provider, no DNS issues)
+    const response = await fetch('https://zenquotes.io/api/random');
     const data = await response.json();
-    quoteElement.textContent = `"${data.content}" - ${data.author}`;
+    quoteElement.textContent = `"${data[0].q}" - ${data[0].a}`;
     quoteElement.style.opacity = '1';
   } catch (error) {
     console.error('Quote API failed:', error);
