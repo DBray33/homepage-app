@@ -219,14 +219,19 @@ function updateGreeting() {
 }
 
 async function updateQuote() {
+  const quoteElement = document.getElementById('quote');
+
   try {
     const response = await fetch('https://api.quotable.io/random?maxLength=150');
     const data = await response.json();
-    document.getElementById('quote').textContent = `"${data.content}" - ${data.author}`;
+    quoteElement.textContent = `"${data.content}" - ${data.author}`;
+    quoteElement.style.opacity = '1';
   } catch (error) {
+    console.error('Quote API failed:', error);
     // Fallback to local quotes if API fails
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    document.getElementById('quote').textContent = randomQuote;
+    quoteElement.textContent = randomQuote;
+    quoteElement.style.opacity = '1';
   }
 }
 
