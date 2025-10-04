@@ -218,9 +218,16 @@ function updateGreeting() {
   document.getElementById('greeting').textContent = greeting;
 }
 
-function updateQuote() {
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-  document.getElementById('quote').textContent = randomQuote;
+async function updateQuote() {
+  try {
+    const response = await fetch('https://api.quotable.io/random?maxLength=150');
+    const data = await response.json();
+    document.getElementById('quote').textContent = `"${data.content}" - ${data.author}`;
+  } catch (error) {
+    // Fallback to local quotes if API fails
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('quote').textContent = randomQuote;
+  }
 }
 
 // ===========================
