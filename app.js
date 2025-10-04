@@ -218,22 +218,31 @@ function updateGreeting() {
   document.getElementById('greeting').textContent = greeting;
 }
 
-async function updateQuote() {
+function updateQuote() {
   const quoteElement = document.getElementById('quote');
 
-  try {
-    // Try ZenQuotes API (different provider, no DNS issues)
-    const response = await fetch('https://zenquotes.io/api/random');
-    const data = await response.json();
-    quoteElement.textContent = `"${data[0].q}" - ${data[0].a}`;
-    quoteElement.style.opacity = '1';
-  } catch (error) {
-    console.error('Quote API failed:', error);
-    // Fallback to local quotes if API fails
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    quoteElement.textContent = randomQuote;
-    quoteElement.style.opacity = '1';
+  // Remove any existing quote script
+  const existingScript = document.getElementById('quote-script');
+  if (existingScript) {
+    existingScript.remove();
   }
+
+  // Create callback
+  window.handleQuote = function (data) {
+    quoteElement.textContent = `"${data.content}" - ${data.author}`;
+    quoteElement.style.opacity = '1';
+    delete window.handleQuote;
+  };
+
+  // Use JSONP to bypass CORS
+  const script = document.createElement('script');
+  script.id = 'quote-script';
+  script.src = `https://api.quotable.io/random?maxLength=150&jsonp=handleQuote`;
+  script.onerror = () => {
+    console.error('Quote API failed');
+    quoteElement.style.display = 'none';
+  };
+  document.head.appendChild(script);
 }
 
 // ===========================
