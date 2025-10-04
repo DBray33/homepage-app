@@ -220,29 +220,12 @@ function updateGreeting() {
 
 function updateQuote() {
   const quoteElement = document.getElementById('quote');
+  if (!quoteElement) return;
 
-  // Remove any existing quote script
-  const existingScript = document.getElementById('quote-script');
-  if (existingScript) {
-    existingScript.remove();
-  }
-
-  // Create callback
-  window.handleQuote = function (data) {
-    quoteElement.textContent = `"${data.content}" - ${data.author}`;
-    quoteElement.style.opacity = '1';
-    delete window.handleQuote;
-  };
-
-  // Use JSONP to bypass CORS
-  const script = document.createElement('script');
-  script.id = 'quote-script';
-  script.src = `https://api.quotable.io/random?maxLength=150&jsonp=handleQuote`;
-  script.onerror = () => {
-    console.error('Quote API failed');
-    quoteElement.style.display = 'none';
-  };
-  document.head.appendChild(script);
+  // Use local quotes array from config.js
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  quoteElement.textContent = randomQuote;
+  quoteElement.style.opacity = '1';
 }
 
 // ===========================
